@@ -36,28 +36,33 @@ The system consists of:
 C4Context
 title Shopping List App - System Context
 
-Person(user, "User", "Uses the shopping list app")
+Person(user, "User", "Uses the shopping list application")
 
-System(web, "Web Frontend", "SPA UI in the browser")
-System(api, "API Gateway", "HTTP + WebSocket entry point")
+System_Boundary(app, "Shopping List Application") {
+  System(web, "Web Frontend", "Browser-based SPA")
+  System(api, "API Gateway", "HTTP + WebSocket entry point")
+
+  System(userService, "User Service", "Authentication and users")
+  System(itemService, "Item Service", "Shopping list items")
+  System(mailService, "Mail Service", "Mock email sender")
+}
 
 System_Ext(db, "PostgreSQL", "Relational database")
 System_Ext(rabbitmq, "RabbitMQ", "RPC messaging")
 System_Ext(kafka, "Kafka", "Event streaming")
 System_Ext(redis, "Redis", "WebSocket Pub/Sub")
 
-System(userService, "User Service", "Auth & users")
-System(itemService, "Item Service", "Shopping items")
-System(mailService, "Mail Service", "Mock email sender")
+Rel(user, web, "Uses", "HTTPS")
+Rel(web, api, "API calls", "HTTP / WebSocket")
 
-Rel(user, web, "Uses")
-Rel(web, api, "HTTP / WebSocket")
-Rel(api, rabbitmq, "RPC")
-Rel(api, redis, "Pub/Sub")
+Rel(api, rabbitmq, "RPC requests")
+Rel(api, redis, "Publish/Subscribe")
+
 Rel(userService, db, "Reads/Writes")
 Rel(itemService, db, "Reads/Writes")
-Rel(userService, kafka, "Publishes events")
-Rel(mailService, kafka, "Consumes events")
+
+Rel(userService, kafka, "Publishes user events")
+Rel(mailService, kafka, "Consumes user events")
 ```
 
 ---
@@ -66,28 +71,44 @@ Rel(mailService, kafka, "Consumes events")
 
 ```mermaid
 C4Container
-title Shopping List App - Containers
+title Shopping List App - Container Architecture
 
-Container(web, "Web", "Lit + JS", "Frontend UI")
-Container(nginx, "Nginx", "Reverse Proxy", "Routes traffic")
-Container(api, "API", "Node.js + Express", "Gateway")
-Container(userService, "User Service", "Node.js", "Auth logic")
-Container(itemService, "Item Service", "Node.js", "Item logic")
-Container(mailService, "Mail Service", "Node.js", "Emails")
-ContainerDb(db, "PostgreSQL", "Relational DB")
-Container(redis, "Redis", "Pub/Sub")
+Container_Boundary(client, "Client") {
+  Container(web, "Web Frontend", "Lit + JavaScript", "SPA UI")
+}
+
+Container_Boundary(edge, "Edge / Routing") {
+  Container(nginx, "Nginx", "Reverse Proxy", "Traffic routing")
+}
+
+Container_Boundary(backend, "Backend") {
+  Container(api, "API Gateway", "Node.js + Express", "HTTP & WebSocket API")
+
+  Container(userService, "User Service", "Node.js", "Auth and users")
+  Container(itemService, "Item Service", "Node.js", "Item management")
+  Container(mailService, "Mail Service", "Node.js", "Email notifications")
+}
+
+ContainerDb(db, "PostgreSQL", "Relational database")
+Container(redis, "Redis", "Pub/Sub", "WebSocket scaling")
 Container(rabbitmq, "RabbitMQ", "RPC messaging")
 Container(kafka, "Kafka", "Event streaming")
 
 Rel(web, nginx, "HTTP")
 Rel(nginx, api, "HTTP")
-Rel(api, userService, "RPC via RabbitMQ")
-Rel(api, itemService, "RPC via RabbitMQ")
-Rel(userService, kafka, "Publish")
-Rel(mailService, kafka, "Consume")
-Rel(api, redis, "Pub/Sub")
+
+Rel(api, userService, "RPC")
+Rel(api, itemService, "RPC")
+Rel(api, redis, "Publish/Subscribe")
+
+Rel(userService, rabbitmq, "Consumes RPC")
+Rel(itemService, rabbitmq, "Consumes RPC")
+
 Rel(userService, db, "SQL")
 Rel(itemService, db, "SQL")
+
+Rel(userService, kafka, "Publish events")
+Rel(mailService, kafka, "Consume events")
 ```
 
 ---
