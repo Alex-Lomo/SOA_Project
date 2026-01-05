@@ -20,7 +20,7 @@ The system consists of:
 - **API Service**: Central HTTP + WebSocket gateway
 - **User Service**: Handles authentication and user management
 - **Item Service**: Manages shopping list items
-- **Mail Service**: Sends mock emails on user signup
+- **Mail Service**: Sends mock emails
 - **PostgreSQL**: Persistent storage
 - **RabbitMQ**: RPC-style communication between API and services
 - **Kafka**: Event streaming between services
@@ -176,7 +176,3 @@ docker compose up --build
 - RabbitMQ UI: http://localhost:15672
 
 ---
-
-## Summary
-
-This project demonstrates a clean, scalable microservices architecture with real-time updates and event-driven communication.
