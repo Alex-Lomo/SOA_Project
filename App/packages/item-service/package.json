@@ -1,0 +1,11 @@
+{
+  "name": "@todo/item-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "pg": "^8.11.3",
+    "kafkajs": "^1.15.0"
+  }
+}
